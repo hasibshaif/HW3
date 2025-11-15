@@ -1,22 +1,59 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
 class Problem {
 public:
-    std::string getQuestion();
-    std::string getAnswer();
-    std::string getTopic();
-    int getDifficulty();
-    Problem(std::string rawProblem);
-    static std::vector<Problem> problemList(std::string filename);
+    virtual ~Problem() = default;
+    virtual std::string getQuestion() const = 0;
+    virtual std::string getAnswer() const = 0;
+};
+
+class ArithmeticProblem : public Problem {
+public:
+    explicit ArithmeticProblem(std::string rawProblem);
+    std::string getQuestion() const override;
+    std::string getAnswer() const override;
+    std::string getTopic() const;
+    int getDifficulty() const;
+    static std::vector<std::shared_ptr<Problem>> problemList(const std::string& filename);
 private:
     std::string question;
     std::string answer;
     std::string topic;
     int difficulty;
+};
+
+class ProblemConstraint {
+public:
+    ProblemConstraint(std::function<int(const Problem&)> metric, int minValue, int maxValue);
+    bool satisfied(const std::vector<std::shared_ptr<Problem>>& selection) const;
+
+private:
+    std::function<int(const Problem&)> metric;
+    int minValue;
+    int maxValue;
+};
+
+class ProblemSelector {
+public:
+    virtual ~ProblemSelector() = default;
+    virtual std::vector<std::shared_ptr<Problem>> select(
+        const std::vector<std::shared_ptr<Problem>>& bank,
+        int count,
+        const std::vector<ProblemConstraint>& constraints) const = 0;
+};
+
+class RandomReshuffleSelector : public ProblemSelector {
+public:
+    std::vector<std::shared_ptr<Problem>> select(
+        const std::vector<std::shared_ptr<Problem>>& bank,
+        int count,
+        const std::vector<ProblemConstraint>& constraints) const override;
 };
 
 #endif
