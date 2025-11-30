@@ -41,7 +41,7 @@ public:
 class LayoutStrategy {
 public:
     virtual ~LayoutStrategy() = default;
-    virtual void writeProblem(std::ostream& output, const Problem& problem, int index) const = 0;
+    virtual void writeProblem(std::ostream& output, const Problem& problem, int index, int shortProblemIndex) const = 0;
     virtual void finish(std::ostream& output) const = 0;
 };
 
@@ -66,7 +66,7 @@ private:
 
 class SimpleLayout : public LayoutStrategy {
 public:
-    void writeProblem(std::ostream& output, const Problem& problem, int) const override {
+    void writeProblem(std::ostream& output, const Problem& problem, int, int) const override {
         output << "\\item " << problem.getQuestion() << "\n";
     }
 
@@ -96,7 +96,7 @@ public:
         header.write(output, static_cast<int>(test.size()));
         
         for (int i = 0; i < static_cast<int>(test.size()); ++i) {
-            layout.writeProblem(output, *test[i], i);
+            layout.writeProblem(output, *test[i], i, -1);
         }
         layout.finish(output);
         return true;

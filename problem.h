@@ -32,6 +32,7 @@ class ProblemConstraint {
 public:
     ProblemConstraint(std::function<int(const Problem&)> metric, int minValue, int maxValue);
     bool satisfied(const std::vector<std::shared_ptr<Problem>>& selection) const;
+    bool wouldExceedMax(const std::vector<std::shared_ptr<Problem>>& selection, const Problem& newProblem) const;
 
 private:
     std::function<int(const Problem&)> metric;
@@ -49,6 +50,31 @@ public:
 };
 
 class RandomReshuffleSelector : public ProblemSelector {
+public:
+    std::vector<std::shared_ptr<Problem>> select(
+        const std::vector<std::shared_ptr<Problem>>& bank,
+        int count,
+        const std::vector<ProblemConstraint>& constraints) const override;
+};
+
+class MathProblem : public Problem {
+public:
+    explicit MathProblem(std::string rawProblem);
+    std::string getQuestion() const override;
+    std::string getAnswer() const override;
+    std::string getTopic() const;
+    std::string getAuthor() const;
+    bool isLong() const;
+    static std::vector<std::shared_ptr<Problem>> problemList(const std::string& filename);
+private:
+    std::string question;
+    std::string answer;
+    std::string topic;
+    std::string author;
+    bool longProblem;
+};
+
+class SmartSelector : public ProblemSelector {
 public:
     std::vector<std::shared_ptr<Problem>> select(
         const std::vector<std::shared_ptr<Problem>>& bank,
